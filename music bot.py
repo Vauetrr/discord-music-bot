@@ -1,6 +1,8 @@
 import discord
-from discord.ext import commands
 import os
+from discord import FFmpegPCMAudio
+from discord.ext import commands
+from youtube_dl import YoutubeDL
 
 client = commands.Bot(command_prefix='bt ')
 
@@ -23,7 +25,21 @@ async def on_disconnect():
 
 @client.command()
 async def play(ctx, url):
-    voiceChannel, voice = await join(ctx)
+    voice = await join(ctx)
+    if voice is None:
+        await ctx.send("huh?")
+        return
+        
+    ydl_ops = {'format': 'bestaudio/best', 'noplaylist': 'True'}
+    ffmpeg_ops = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 4294', 'options': '-vn'}
+
+    if not voice.is_playing():
+        with YoutubeDL(ydl_ops) as ydl:
+            info = ydl.extract_info(url, download=False)
+        newUrl = info['url']
+        voice.play(FFmpegPCMAudio(newUrl, **ffmpeg_ops))
+    else:
+        await ctx.send("\"patience is patience\" - Sun Tzu")
 
 @client.command()
 async def join(ctx):
@@ -32,8 +48,8 @@ async def join(ctx):
     else:
         voiceChannel = discord.utils.get(ctx.guild.voice_channels)
         if not voiceChannel:
-            await ctx.send('There are no voice channels dickhead')
-            return
+            await ctx.send('there are no voice channels dickhead')
+            return None
 
     voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
     if voice is None:
@@ -42,7 +58,7 @@ async def join(ctx):
         await voice.disconnect(force=True)
         voice = await voiceChannel.connect()
 
-    return (voiceChannel, voice)
+    return voice
 
 @client.command()
 async def leave(ctx):
@@ -66,6 +82,14 @@ async def resume(ctx):
     if voice is not None and voice.is_paused():
         voice.resume()
     else:
-        await ctx.send("\"shush\" - Bao Tan")
+        await ctx.send("\"shush\" - bao tan")
+
+@client.command()
+async def stop(ctx):
+    voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
+    if voice is not None and (voice.is_playing() or voice.is_paused()):
+        voice.stop()
+    else:
+        await ctx.send("bao tan says stfu")
 
 client.run(os.getenv('TOKEN'))
