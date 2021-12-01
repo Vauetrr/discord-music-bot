@@ -2,11 +2,16 @@ import discord
 from discord.ext import commands
 import os
 
-client = commands.Bot(command_prefix='!')
+client = commands.Bot(command_prefix='bt ')
 
 @client.event
 async def on_ready():
     print(f'{client.user} logged in')
+
+@client.event
+async def on_disconnect():
+    for voice in client.voice_clients:
+        voice.disconnect()
 
 # @client.event
 # async def on_message(message):
@@ -20,7 +25,6 @@ async def on_ready():
 async def play(ctx, url):
     if ctx.author.voice:
         voiceChannel = ctx.author.voice.channel
-        print('first')
     else:
         voiceChannel = discord.utils.get(ctx.guild.voice_channels)
         if not voiceChannel:
@@ -28,11 +32,10 @@ async def play(ctx, url):
             return
 
     voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
-    if voice is not None:
-        if not voice.is_connected():
-            await voice.disconnect()
-            await voiceChannel.connect()
-    else:
-        await voiceChannel.connect()
+    if voice is None:
+        voice = await voiceChannel.connect()
+    elif not voice.is_connected() or voice.channel != voiceChannel:
+        await voice.disconnect(force=True)
+        voice = await voiceChannel.connect()
 
 client.run(os.getenv('TOKEN'))
