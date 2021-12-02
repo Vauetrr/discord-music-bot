@@ -8,7 +8,7 @@ from discord.ext import commands
 from youtube_dl import YoutubeDL
 
 # global vars
-client = commands.Bot(command_prefix='btt ')
+client = commands.Bot(command_prefix='bt ')
 playlist = []
 
 # basic events
