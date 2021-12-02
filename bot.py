@@ -14,6 +14,10 @@ playlist = []
 @client.event
 async def on_ready():
     print(f'{client.user} logged in')
+    # disconnect from voice channels bot may have been left in
+    for voice in client.voice_clients:
+        await voice.connect()
+        await voice.disconnect(force=True)
 
 @client.event
 async def on_disconnect():
@@ -144,7 +148,11 @@ async def skip(ctx):
     """stops playing the current track and plays the next in the queue (if any)"""
     voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
     if voice is not None and (voice.is_playing() or voice.is_paused()):
-        await voice.stop()
+        # this is in a try/except because the voice doesn't stop fast enough without await
+        try:
+            await voice.stop()
+        except TypeError:
+            pass
         if len(playlist):
             newCtx, url = playlist.pop(0)
             await play(newCtx, url)
