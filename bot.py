@@ -4,7 +4,7 @@ from discord import FFmpegPCMAudio
 from discord.ext import commands
 from youtube_dl import YoutubeDL
 
-client = commands.Bot(command_prefix='bt ')
+client = commands.Bot(command_prefix='btt ')
 
 @client.event
 async def on_ready():
@@ -13,7 +13,7 @@ async def on_ready():
 @client.event
 async def on_disconnect():
     for voice in client.voice_clients:
-        voice.disconnect()
+        await voice.disconnect(force=True)
 
 # @client.event
 # async def on_message(message):
