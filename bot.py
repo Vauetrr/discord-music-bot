@@ -2,22 +2,22 @@ import discord
 import os
 import asyncio
 import random
+import validators
 from discord import FFmpegPCMAudio
 from discord.ext import commands
 from youtube_dl import YoutubeDL
 
 # global vars
-client = commands.Bot(command_prefix='bt ')
+client = commands.Bot(command_prefix='btt ')
 playlist = []
 
 # basic events
 @client.event
 async def on_ready():
     print(f'{client.user} logged in')
-    # disconnect from voice channels bot may have been left in
+    # reconnect to voice channels bot may have been left in
     for voice in client.voice_clients:
-        await voice.connect()
-        await voice.disconnect(force=True)
+        if not voice.is_connected(): await voice.connect()
 
 @client.event
 async def on_disconnect():
@@ -76,7 +76,7 @@ async def leave(ctx):
 
 
 @client.command()
-async def play(ctx, url):
+async def play(ctx, vidId, *args):
     """play the song at the given youtube url"""
     # join if not joined (unless impossible)
     voice = await join(ctx)
@@ -86,19 +86,28 @@ async def play(ctx, url):
 
     # function parameters
     ydl_ops = {'format': 'bestaudio/best', 'noplaylist': 'True'}
-    ffmpeg_ops = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 4294', 'options': '-vn'}
+    ffmpeg_ops = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
     positions = {1: 'st', 2: 'nd', 3: 'rd'}
 
     # play the song, or add to playlist if a song is already playing
+    print(voice.is_playing())
     if voice.is_playing():
         pos = len(playlist) + 1
-        playlist.append((ctx, url))
+        playlist.append((ctx, vidId) + args)
         await ctx.send(f"\"patience, your track is {pos}{positions.get(pos, 'th')} in the queue\" - Sun Tzu")
     else:
         with YoutubeDL(ydl_ops) as ydl:
-            info = ydl.extract_info(url, download=False)
-        newUrl = info['url']
-        voice.play(FFmpegPCMAudio(newUrl, **ffmpeg_ops), after=playNext)
+            # get the url based on if input is a url or search
+            if not len(args) and validators.url(vidId) and ("youtube" in vidId or "youtu.be" in vidId):
+                # url
+                info = ydl.extract_info(vidId, download=False)
+            else:
+                # search query
+                query = vidId + ' ' + ' '.join(args)
+                print(vidId, args, query)
+                info = ydl.extract_info(f"ytsearch:{query}", download=False)['entries'][0]
+        url = info['url']
+        voice.play(FFmpegPCMAudio(url, **ffmpeg_ops), after=playNext)
 
 @client.command()
 async def pause(ctx):
@@ -135,8 +144,8 @@ async def stop(ctx):
 def playNext(error):
     """plays the next song in the queue"""
     if len(playlist):
-        ctx, url = playlist.pop(0)
-        coro = play(ctx, url)
+        args = playlist.pop(0)
+        coro = play(*args)
         fut = asyncio.run_coroutine_threadsafe(coro, client.loop)
         try:
             fut.result()
@@ -148,22 +157,20 @@ async def skip(ctx):
     """stops playing the current track and plays the next in the queue (if any)"""
     voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
     if voice is not None and (voice.is_playing() or voice.is_paused()):
-        # this is in a try/except because the voice doesn't stop fast enough without await
-        try:
-            await voice.stop()
-        except TypeError:
-            pass
+        # sleep for a bit to ensure voice has stopped
+        voice.stop()
+        await asyncio.sleep(1.5)
         if len(playlist):
-            newCtx, url = playlist.pop(0)
-            await play(newCtx, url)
+            args = playlist.pop(0)
+            await play(*args)
         
     else:
         await ctx.send("shut yo ass up and praise bao tan")
 
 @client.command()
-async def insert(ctx, url):
+async def insert(ctx, vidId, *args):
     """queues the track to play next"""
-    playlist.insert(0, (ctx, url))
+    playlist.insert(0, (ctx, vidId) + args)
     await ctx.send("your track is playing next, you impatient bastard")
 
 @client.command()
