@@ -29,7 +29,7 @@ async def play(ctx, url):
     if voice is None:
         await ctx.send("huh?")
         return
-        
+
     ydl_ops = {'format': 'bestaudio/best', 'noplaylist': 'True'}
     ffmpeg_ops = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 4294', 'options': '-vn'}
 
