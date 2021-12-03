@@ -10,7 +10,7 @@ from youtube_dl import YoutubeDL
 # global vars
 client = commands.Bot(
     command_prefix='bt ', 
-    activity=discord.Activity(name='you | "bt __"', type=discord.ActivityType.watching))
+    activity=discord.Activity(name='you | "bt help"', type=discord.ActivityType.watching))
 playlist = []
 
 # basic events
@@ -75,7 +75,7 @@ async def leave(ctx):
 
 @client.command()
 async def play(ctx, vidId, *args):
-    """play the song at the given youtube url"""
+    """play the youtube track in the voice channel"""
     # join if not joined (unless impossible)
     voice = await join(ctx)
     if voice is None:
@@ -177,8 +177,18 @@ async def shuffle(ctx):
 
 
 ### message commands
+
+
+client.remove_command("help")
+@client.command()
+async def help(ctx):
+    """provides information on how to use the bot"""
+    await ctx.send("you can tell me to play, join, leave, pause, resume, stop, skip, insert, or shuffle\n" +
+                   "don't expect anything else")
+
 @client.listen('on_message')
 async def pray(message):
+    # easter egg to pray to messages praising bao tan
     if "Praise be Bao Tan" in message.content:
         await message.add_reaction("🙏")
 
