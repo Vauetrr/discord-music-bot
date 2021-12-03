@@ -15,23 +15,19 @@ playlist = []
 @client.event
 async def on_ready():
     print(f'{client.user} logged in')
-    # reconnect to voice channels bot may have been left in
-    for voice in client.voice_clients:
-        if not voice.is_connected(): await voice.connect()
+    # set bot state to disconnected in all servers
+    for guild in client.guilds:
+        vc = discord.utils.find(lambda x: [y for y in x.members if y == client.user], guild.voice_channels)
+        if vc:
+            print('yep')
+            voice = await vc.connect()
+            await voice.disconnect()
 
 @client.event
 async def on_disconnect():
     # leave voice channels/clients when leaving discord
     for voice in client.voice_clients:
         await voice.disconnect(force=True)
-
-# @client.event
-# async def on_message(message):
-#     if message.author == client.user:
-#         return
-    
-#     if message.content.startswith('cool'):
-#         await message.channel.send('Cool beans')
 
 
 ### connection commands
@@ -90,7 +86,6 @@ async def play(ctx, vidId, *args):
     positions = {1: 'st', 2: 'nd', 3: 'rd'}
 
     # play the song, or add to playlist if a song is already playing
-    print(voice.is_playing())
     if voice.is_playing():
         pos = len(playlist) + 1
         playlist.append((ctx, vidId) + args)
@@ -104,7 +99,6 @@ async def play(ctx, vidId, *args):
             else:
                 # search query
                 query = vidId + ' ' + ' '.join(args)
-                print(vidId, args, query)
                 info = ydl.extract_info(f"ytsearch:{query}", download=False)['entries'][0]
         url = info['url']
         voice.play(FFmpegPCMAudio(url, **ffmpeg_ops), after=playNext)
