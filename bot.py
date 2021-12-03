@@ -10,7 +10,7 @@ from youtube_dl import YoutubeDL
 # global vars
 client = commands.Bot(
     command_prefix='bt ', 
-    activity=discord.Activity(name='you | bt', type=discord.ActivityType.watching))
+    activity=discord.Activity(name='you | "bt __"', type=discord.ActivityType.watching))
 playlist = []
 
 # basic events
@@ -174,6 +174,13 @@ async def shuffle(ctx):
     """shuffles the order of the queue"""
     random.shuffle(playlist)
     await ctx.send("\"ah, I do love a bit of anarchy\" - bao tan")
+
+
+### message commands
+@client.listen('on_message')
+async def pray(message):
+    if "Praise be Bao Tan" in message.content:
+        await message.add_reaction("🙏")
 
 # run the bot
 client.run(os.getenv('TOKEN'))
