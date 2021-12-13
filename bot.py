@@ -10,7 +10,7 @@ from youtube_dl import YoutubeDL
 # global vars
 client = commands.Bot(
     command_prefix='bt ', 
-    activity=discord.Activity(name='you | "bt help"', type=discord.ActivityType.watching))
+    activity=discord.Activity(name='you | bt help', type=discord.ActivityType.watching))
 playlist = []
 
 # basic events
@@ -21,7 +21,6 @@ async def on_ready():
     for guild in client.guilds:
         vc = discord.utils.find(lambda x: [y for y in x.members if y == client.user], guild.voice_channels)
         if vc:
-            print('yep')
             voice = await vc.connect()
             await voice.disconnect()
 
