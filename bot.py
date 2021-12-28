@@ -93,6 +93,8 @@ async def play(ctx, vidId, *args):
         await ctx.send(f"\"patience, your track is {pos}{positions.get(pos, 'th')} in the queue\" - Sun Tzu")
     else:
         with YoutubeDL(ydl_ops) as ydl:
+            # remove the cache to stop 403 errors
+            ydl.cache.remove()
             # get the url based on if input is a url or search
             if not len(args) and validators.url(vidId) and ("youtube" in vidId or "youtu.be" in vidId):
                 # url
@@ -181,7 +183,7 @@ async def queue(ctx):
     for request in playlist:
         songCtx = request[0]
         if queue: queue += '\n'
-        queue += '"' + ' '.join(request[1:]) + '" - ' + songCtx.author.name[:-5]
+        queue += '"' + ' '.join(request[1:]) + '" - ' + songCtx.author.name
     if not queue: queue = "no queue tea for you"
     await ctx.send(queue)
 
