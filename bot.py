@@ -154,9 +154,9 @@ async def skip(ctx):
     """stops playing the current track and plays the next in the queue (if any)"""
     voice = discord.utils.get(client.voice_clients, guild=ctx.guild)
     if voice is not None and (voice.is_playing() or voice.is_paused()):
-        # sleep for a bit to ensure voice has stopped
+        # sleep for a bit to ensure voice has stopped (known issue, will be fixed later)
         voice.stop()
-        await asyncio.sleep(2)
+        await asyncio.sleep(3)
         if len(playlist):
             args = playlist.pop(0)
             await play(*args)
