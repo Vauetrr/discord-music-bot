@@ -154,7 +154,7 @@ async def skip(ctx):
     if voice is not None and (voice.is_playing() or voice.is_paused()):
         # sleep for a bit to ensure voice has stopped
         voice.stop()
-        await asyncio.sleep(1.5)
+        await asyncio.sleep(2)
         if len(playlist):
             args = playlist.pop(0)
             await play(*args)
