@@ -17,4 +17,5 @@ The bot's commands use the prefix "bt ". The current commands are:
   * skip - Skips the current track and plays the next one in the playlist (if any)
   * insert [youtube url | search] - Insert the youtube track at the top of the playlist
   * shuffle - Shuffle the order of the tracks in the playlist
+  * queue - Lists the current track requests in the playlist
   * help - Gives the user the list of commands the bot can do

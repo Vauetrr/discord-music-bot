@@ -174,6 +174,18 @@ async def shuffle(ctx):
     random.shuffle(playlist)
     await ctx.send("\"ah, I do love a bit of anarchy\" - bao tan")
 
+@client.command()
+async def queue(ctx):
+    """displays what music is playing next in the queue"""
+    queue = ""
+    for request in playlist:
+        songCtx = request[0]
+        if queue: queue += '\n'
+        queue += '"' + ' '.join(request[1:]) + '" - ' + songCtx.author.name[:-5]
+    if not queue: queue = "no queue tea for you"
+    await ctx.send(queue)
+
+
 
 ### message commands
 
@@ -182,7 +194,7 @@ client.remove_command("help")
 @client.command()
 async def help(ctx):
     """provides information on how to use the bot"""
-    await ctx.send("you can tell me to play, join, leave, pause, resume, stop, skip, insert, or shuffle\n" +
+    await ctx.send("you can tell me to play, join, leave, pause, resume, stop, skip, insert, shuffle, or queue\n" +
                    "don't expect anything else")
 
 @client.listen('on_message')
