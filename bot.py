@@ -82,7 +82,7 @@ async def play(ctx, vidId, *args):
         return
 
     # function parameters
-    ydl_ops = {'format': 'bestaudio/best', 'noplaylist': 'True'}
+    ydl_ops = {'cookies': './cookies.txt', 'format': 'bestaudio/best', 'noplaylist': 'True'}
     ffmpeg_ops = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
     positions = {1: 'st', 2: 'nd', 3: 'rd'}
 
