@@ -202,7 +202,7 @@ async def help(ctx):
 @client.listen('on_message')
 async def pray(message):
     # easter egg to pray to messages praising bao tan
-    if "Praise be Bao Tan" in message.content:
+    if "praise be bao tan" in message.content.lower():
         await message.add_reaction("🙏")
 
 # run the bot
